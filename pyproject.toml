@@ -130,5 +130,10 @@ select = [
     # tryceratops
     "TRY",
 ]
-ignore = ["ANN201", "ANN204", "PLR2004", "TRY301", "COM812", "PLR0917", "PLR0913", "S104", "E712", "PLR0904", "ANN003"]
+ignore = [
+    "ANN201", "ANN204", "PLR2004", "TRY301",
+    "COM812", "PLR0917", "PLR0913", "S104",
+    "E712", "PLR0904", "ANN003", "N818",
+    "DOC502"
+]
 exclude = [".venv", "alembic/*"]

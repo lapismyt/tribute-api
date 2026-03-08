@@ -1,10 +1,10 @@
 import logging
-from uuid import UUID
 
 import aiohttp
 from pydantic import SecretStr
 
 from tribute_api._types import AnyUUID
+from tribute_api._utils import uuid_to_str
 from tribute_api.base.client import TributeApiBaseClient
 from tribute_api.base.models import TributeModel
 from tribute_api.v1 import DEFAULT_BASE_URL
@@ -52,36 +52,32 @@ class TributeApiV1ClientRaw(TributeApiBaseClient):
     @staticmethod
     async def _handle_response[T: TributeModel](
         resp: aiohttp.ClientResponse, response_class: type[T]
-    ) -> T | TributeError:
+    ) -> T | tuple[int, TributeError]:
         if resp.status == 200:
             return response_class.model_validate(await resp.json())
-        return TributeError.model_validate(await resp.json())
+        return (resp.status, TributeError.model_validate(await resp.json()))
 
     @staticmethod
     async def _handle_list_response[T: TributeModel](
         resp: aiohttp.ClientResponse, response_class: type[T]
-    ) -> list[T] | TributeError:
+    ) -> list[T] | tuple[int, TributeError]:
         if resp.status == 200:
             return [response_class.model_validate(el) for el in await resp.json()]
-        return TributeError.model_validate(await resp.json())
+        return (resp.status, TributeError.model_validate(await resp.json()))
 
-    @staticmethod
-    def _uuid_to_str(uuid: AnyUUID) -> str:
-        if isinstance(uuid, UUID):
-            return str(uuid)
-        return uuid
-
-    async def get_shop_raw(self) -> TributeShopInfo | TributeError:
+    async def get_shop_raw(self) -> TributeShopInfo | tuple[int, TributeError]:
         return await self._handle_response(await self._get("/shop"), TributeShopInfo)
 
-    async def get_shop_orders_raw(self) -> list[TributeShopOrder] | TributeError:
+    async def get_shop_orders_raw(
+        self,
+    ) -> list[TributeShopOrder] | tuple[int, TributeError]:
         return await self._handle_list_response(
             await self._get("/shop/orders"), TributeShopOrder
         )
 
     async def create_shop_order_raw(
         self, body: TributeCreateShopOrderRequestBody
-    ) -> TributeCreateShopOrderResponse | TributeError:
+    ) -> TributeCreateShopOrderResponse | tuple[int, TributeError]:
         return await self._handle_response(
             await self._post("/shop/orders", json=body.model_dump()),
             TributeCreateShopOrderResponse,
@@ -89,28 +85,28 @@ class TributeApiV1ClientRaw(TributeApiBaseClient):
 
     async def get_shop_order_status_raw(
         self, order_uuid: AnyUUID
-    ) -> TributeGetShopOrderStatusResponse | TributeError:
+    ) -> TributeGetShopOrderStatusResponse | tuple[int, TributeError]:
         return await self._handle_response(
-            await self._get(f"/shop/orders/{self._uuid_to_str(order_uuid)}/status"),
+            await self._get(f"/shop/orders/{uuid_to_str(order_uuid)}/status"),
             TributeGetShopOrderStatusResponse,
         )
 
     async def cancel_recurring_shop_order_raw(
         self, order_uuid: AnyUUID
-    ) -> TributeCancelRecurringShopOrderResponse | TributeError:
+    ) -> TributeCancelRecurringShopOrderResponse | tuple[int, TributeError]:
         return await self._handle_response(
             await self._post(
-                f"/shop/orders/{self._uuid_to_str(order_uuid)}/cancel",
+                f"/shop/orders/{uuid_to_str(order_uuid)}/cancel",
             ),
             TributeCancelRecurringShopOrderResponse,
         )
 
     async def get_shop_order_transactions_raw(
         self, order_uuid: AnyUUID, start_from: str | None = None
-    ) -> TributeGetShopOrderTransactionsResponse | TributeError:
+    ) -> TributeGetShopOrderTransactionsResponse | tuple[int, TributeError]:
         return await self._handle_response(
             await self._get(
-                f"/shop/orders/{self._uuid_to_str(order_uuid)}/transactions",
+                f"/shop/orders/{uuid_to_str(order_uuid)}/transactions",
                 params={"startFrom": start_from},
             ),
             TributeGetShopOrderTransactionsResponse,
@@ -118,10 +114,10 @@ class TributeApiV1ClientRaw(TributeApiBaseClient):
 
     async def refund_shop_order_transaction_raw(
         self, order_uuid: AnyUUID, tx_id: int
-    ) -> TributeShopRefundTransactionResponse | TributeError:
+    ) -> TributeShopRefundTransactionResponse | tuple[int, TributeError]:
         return await self._handle_response(
             await self._post(
-                f"/shop/orders/{self._uuid_to_str(order_uuid)}/transactions/{tx_id}/refund"
+                f"/shop/orders/{uuid_to_str(order_uuid)}/transactions/{tx_id}/refund"
             ),
             TributeShopRefundTransactionResponse,
         )
@@ -133,13 +129,13 @@ class TributeApiV1ClientRaw(TributeApiBaseClient):
         active: bool | None = None,
         limit: int | None = None,
         offset: int | None = None,
-    ) -> list[TributeShopToken] | TributeError:
+    ) -> list[TributeShopToken] | tuple[int, TributeError]:
         return await self._handle_list_response(
             await self._get(
                 "/shop/tokens",
                 params={
                     "customer_id": customer_id,
-                    "order_uuid": self._uuid_to_str(order_uuid) if order_uuid else None,
+                    "order_uuid": uuid_to_str(order_uuid) if order_uuid else None,
                     "active": (
                         ("true" if active else "false") if active is not None else None
                     ),
@@ -152,25 +148,25 @@ class TributeApiV1ClientRaw(TributeApiBaseClient):
 
     async def get_shop_token_raw(
         self, token_uuid: AnyUUID
-    ) -> TributeShopToken | TributeError:
+    ) -> TributeShopToken | tuple[int, TributeError]:
         return await self._handle_response(
             await self._get(
-                f"/shop/tokens/{self._uuid_to_str(token_uuid)}",
+                f"/shop/tokens/{uuid_to_str(token_uuid)}",
             ),
             TributeShopToken,
         )
 
     async def deactivate_shop_token_raw(
         self, token_uuid: AnyUUID
-    ) -> TributeDeactivateShopTokenResponse | TributeError:
+    ) -> TributeDeactivateShopTokenResponse | tuple[int, TributeError]:
         return await self._handle_response(
-            await self._delete(f"/shop/tokens/{self._uuid_to_str(token_uuid)}"),
+            await self._delete(f"/shop/tokens/{uuid_to_str(token_uuid)}"),
             TributeDeactivateShopTokenResponse,
         )
 
     async def create_shop_charge_raw(
         self, body: TributeCreateShopChargeRequestBody
-    ) -> TributeShopCharge | TributeError:
+    ) -> TributeShopCharge | tuple[int, TributeError]:
         return await self._handle_response(
             await self._post("/shop/charges", json=body.model_dump()),
             TributeShopCharge,
@@ -178,10 +174,10 @@ class TributeApiV1ClientRaw(TributeApiBaseClient):
 
     async def get_shop_charge_raw(
         self, charge_uuid: AnyUUID
-    ) -> TributeShopCharge | TributeError:
+    ) -> TributeShopCharge | tuple[int, TributeError]:
         return await self._handle_response(
             await self._get(
-                f"/shop/charges/{self._uuid_to_str(charge_uuid)}",
+                f"/shop/charges/{uuid_to_str(charge_uuid)}",
             ),
             TributeShopCharge,
         )
