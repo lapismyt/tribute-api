@@ -5,10 +5,10 @@ from pydantic import SecretStr
 
 from tribute_api._types import AnyUUID
 from tribute_api._utils import raise_from_error_tuple
-from tribute_api.v1 import (
+from tribute_api.v1.client_raw import TributeApiV1ClientRaw
+from tribute_api.v1.const import (
     DEFAULT_BASE_URL,
 )
-from tribute_api.v1.client_raw import TributeApiV1ClientRaw
 from tribute_api.v1.enums import TributeOrderStatus
 from tribute_api.v1.models.shop import (
     TributeCancelRecurringShopOrderResponse,

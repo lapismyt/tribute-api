@@ -1,7 +1,7 @@
 from pydantic import Field
 
 from tribute_api.base.models import TributeModel
-from tribute_api.v1.models.shop import TributeTransaction
+from .._transaction import TributeTransaction
 
 
 class TributeGetShopOrderTransactionsResponse(TributeModel):

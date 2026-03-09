@@ -2,18 +2,16 @@ from typing import NoReturn
 from uuid import UUID
 
 from tribute_api._types import AnyUUID
-from tribute_api.v1 import (
+from tribute_api.v1.exceptions import (
+    TributeApiV1BadGateway,
     TributeApiV1BadRequest,
+    TributeApiV1Conflict,
     TributeApiV1Exception,
     TributeApiV1Forbidden,
     TributeApiV1NotFound,
     TributeApiV1ServerError,
-    TributeApiV1Unauthorized,
-)
-from tribute_api.v1.exceptions import (
-    TributeApiV1BadGateway,
-    TributeApiV1Conflict,
     TributeApiV1TooManyRequests,
+    TributeApiV1Unauthorized,
 )
 from tribute_api.v1.models._error import TributeError
 

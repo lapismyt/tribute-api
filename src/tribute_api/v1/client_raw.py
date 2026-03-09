@@ -7,7 +7,7 @@ from tribute_api._types import AnyUUID
 from tribute_api._utils import uuid_to_str
 from tribute_api.base.client import TributeApiBaseClient
 from tribute_api.base.models import TributeModel
-from tribute_api.v1 import DEFAULT_BASE_URL
+from tribute_api.v1.const import DEFAULT_BASE_URL
 from tribute_api.v1.models._error import TributeError
 from tribute_api.v1.models.shop import (
     TributeCancelRecurringShopOrderResponse,

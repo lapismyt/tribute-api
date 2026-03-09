@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 
 class TributeBillingPeriod(StrEnum):
@@ -10,7 +10,7 @@ class TributeBillingPeriod(StrEnum):
     YEARLY = "yearly"
 
 
-class TributeShopStatus(StrEnum):
+class TributeShopStatus(IntEnum):
     INACTIVE = 0
     ACTIVE = 1
 
