@@ -2,11 +2,6 @@ from typing import Annotated
 
 from pydantic import Discriminator
 
-from tribute_api.v1.models.webhooks import (
-    TributeShopOrderCancelledNotification,
-    TributeShopTokenChargeFailedNotification,
-    TributeShopTokenChargeSuccessNotification,
-)
 from tribute_api.v1.models.webhooks.cancelled_donation import (
     TributeCancelledDonationNotification,
 )
@@ -39,6 +34,9 @@ from tribute_api.v1.models.webhooks.renewed_subscription import (
     TributeRenewedSubscriptionNotification,
 )
 from tribute_api.v1.models.webhooks.shop_order import TributeShopOrderNotification
+from tribute_api.v1.models.webhooks.shop_order_cancelled import (
+    TributeShopOrderCancelledNotification,
+)
 from tribute_api.v1.models.webhooks.shop_order_charge_failed import (
     TributeShopOrderChargeFailedNotification,
 )
@@ -50,6 +48,12 @@ from tribute_api.v1.models.webhooks.shop_order_payment_failed import (
 )
 from tribute_api.v1.models.webhooks.shop_order_refunded import (
     TributeShopOrderRefundedNotification,
+)
+from tribute_api.v1.models.webhooks.shop_token_charge_failed import (
+    TributeShopTokenChargeFailedNotification,
+)
+from tribute_api.v1.models.webhooks.shop_token_charge_success import (
+    TributeShopTokenChargeSuccessNotification,
 )
 
 TributeWebhookNotification = Annotated[

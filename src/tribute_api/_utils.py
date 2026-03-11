@@ -44,20 +44,20 @@ def raise_from_error_tuple(err_tup: tuple[int, TributeError]) -> NoReturn:
 
     match status:
         case 400:
-            raise TributeApiV1BadRequest(error.code, error.message)
+            raise TributeApiV1BadRequest(error.code or error.error, error.message)
         case 401:
-            raise TributeApiV1Unauthorized(error.code, error.message)
+            raise TributeApiV1Unauthorized(error.code or error.error, error.message)
         case 403:
-            raise TributeApiV1Forbidden(error.code, error.message)
+            raise TributeApiV1Forbidden(error.code or error.error, error.message)
         case 404:
-            raise TributeApiV1NotFound(error.code, error.message)
+            raise TributeApiV1NotFound(error.code or error.error, error.message)
         case 409:
-            raise TributeApiV1Conflict(error.code, error.message)
+            raise TributeApiV1Conflict(error.code or error.error, error.message)
         case 429:
-            raise TributeApiV1TooManyRequests(error.code, error.message)
+            raise TributeApiV1TooManyRequests(error.code or error.error, error.message)
         case 500:
-            raise TributeApiV1ServerError(error.code, error.message)
+            raise TributeApiV1ServerError(error.code or error.error, error.message)
         case 502:
-            raise TributeApiV1BadGateway(error.code, error.message)
+            raise TributeApiV1BadGateway(error.code or error.error, error.message)
         case _:
-            raise TributeApiV1Exception(error.code, error.message)
+            raise TributeApiV1Exception(error.code or error.error, error.message)
