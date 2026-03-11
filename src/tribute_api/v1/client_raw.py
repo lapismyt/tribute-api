@@ -9,6 +9,17 @@ from tribute_api.base.client import TributeApiBaseClient
 from tribute_api.base.models import TributeModel
 from tribute_api.v1.const import DEFAULT_BASE_URL
 from tribute_api.v1.models._error import TributeError
+from tribute_api.v1.models.enums import TributeOrderStatus
+from tribute_api.v1.models.orders._physical_order import TributePhysicalOrder
+from tribute_api.v1.models.orders._queries.get_orders_list import (
+    TributePhysicalOrdersListResponse,
+)
+from tribute_api.v1.models.products import (
+    TributeCancelDigitalProductPurchaseResponse,
+    TributeGetProductsListResponse,
+    TributeProduct,
+    TributeProductType,
+)
 from tribute_api.v1.models.shop import (
     TributeCancelRecurringShopOrderResponse,
     TributeCreateShopOrderRequestBody,
@@ -180,4 +191,76 @@ class TributeApiV1ClientRaw(TributeApiBaseClient):
                 f"/shop/charges/{uuid_to_str(charge_uuid)}",
             ),
             TributeShopCharge,
+        )
+
+    async def get_products_list_raw(
+        self,
+        page: int | None = None,
+        size: int | None = None,
+        product_type: TributeProductType | None = None,
+        desc: bool | None = None,
+    ) -> TributeGetProductsListResponse | tuple[int, TributeError]:
+        return await self._handle_response(
+            await self._get(
+                "/products",
+                params={
+                    "page": page,
+                    "size": size,
+                    "type": product_type.value if product_type else None,
+                    "desc": desc,
+                },
+            ),
+            TributeGetProductsListResponse,
+        )
+
+    async def get_product_by_id_raw(
+        self, product_id: str
+    ) -> TributeProduct | tuple[int, TributeError]:
+        return await self._handle_response(
+            await self._get(
+                f"/products/{product_id}",
+            ),
+            TributeProduct,
+        )
+
+    async def cancel_digital_product_purchase_raw(
+        self, purchase_id: int
+    ) -> TributeCancelDigitalProductPurchaseResponse | tuple[int, TributeError]:
+        return await self._handle_response(
+            await self._post(
+                f"/products/purchases/{purchase_id}/cancel",
+            ),
+            TributeCancelDigitalProductPurchaseResponse,
+        )
+
+    async def get_orders_list_raw(
+        self,
+        last_order_id: str | None = None,
+        status: list[TributeOrderStatus] | None = None,
+        limit: int | None = None,
+        page: int | None = None,
+    ) -> TributePhysicalOrdersListResponse | tuple[int, TributeError]:
+        return await self._handle_response(
+            await self._get(
+                "/physical/orders",
+                params={
+                    "lastOrderId": last_order_id,
+                    "status": (
+                        ",".join([stat.value for stat in status]) if status else None
+                    ),
+                    "limit": limit,
+                    "page": page,
+                },
+            ),
+            TributePhysicalOrdersListResponse,
+        )
+
+    async def get_order_details_raw(
+        self, order_id: int
+    ) -> TributePhysicalOrder | tuple[int, TributeError]:
+        return await self._handle_response(
+            await self._get(
+                f"/physical/orders/{order_id}",
+            ),
+            TributePhysicalOrder,
         )

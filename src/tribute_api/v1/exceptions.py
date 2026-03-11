@@ -1,5 +1,5 @@
 from tribute_api.base.exceptions import TributeApiBaseError
-from tribute_api.v1.enums import TributeErrorCode
+from tribute_api.v1.models.enums import TributeErrorCode
 
 
 class TributeApiV1Exception(TributeApiBaseError):

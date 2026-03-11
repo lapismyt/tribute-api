@@ -4,13 +4,8 @@ from tribute_api.base.models import TributeModel
 
 
 class TributeCancelRecurringShopOrderResponse(TributeModel):
-    success: bool = Field(
-        ...,
-        description="Whether the operation was successful",
-        examples=[True],
-    )
-    message: str = Field(
-        ...,
-        description="Success message",
-        examples=["recurring order cancelled"],
-    )
+    success: bool = Field(..., examples=[True])
+    """Whether the operation was successful."""
+
+    message: str = Field(..., examples=["recurring order cancelled"])
+    """Success message."""

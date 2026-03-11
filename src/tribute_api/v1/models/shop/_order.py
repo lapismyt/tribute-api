@@ -4,8 +4,8 @@ from uuid import UUID
 from pydantic import EmailStr, Field, HttpUrl, field_validator
 
 from tribute_api.base.models import TributeModel
-from tribute_api.v1.enums import TributeCurrency
-from tribute_api.v1.enums.shop import (
+from tribute_api.v1.models.enums import TributeCurrency
+from tribute_api.v1.models.enums.shop import (
     TributeBillingPeriod,
     TributeMemberStatus,
     TributeOrderStatus,
@@ -13,80 +13,59 @@ from tribute_api.v1.enums.shop import (
 
 
 class TributeShopOrder(TributeModel):
-    uuid: UUID = Field(
-        ...,
-        description="Order UUID",
-        examples=[UUID("550e8400-e29b-41d4-a716-446655440000")],
-    )
-    amount: int = Field(
-        ...,
-        description="Order amount in smallest currency units (cents/kopecks)",
-        examples=[100000],
-    )
-    currency: TributeCurrency = Field(
-        ...,
-        description="Currency code (lowercase)",
-        examples=[TributeCurrency.RUB],
-    )
-    title: str = Field(
-        ...,
-        description="Order title (max 100 UTF-16 characters)",
-        examples=["Product X"],
-    )
-    description: str = Field(
-        ...,
-        description="Order description (max 500 UTF-16 characters)",
-        examples=["Detailed product description"],
-    )
-    status: TributeOrderStatus = Field(
-        ...,
-        description="Order status",
-        examples=[TributeOrderStatus.PAID],
-    )
-    email: EmailStr | None = Field(
-        None,
-        description="Customer email (optional)",
-        examples=["customer@example.com"],
-    )
-    success_url: HttpUrl = Field(
-        ...,
-        description="Redirect URL on successful payment",
-        examples=[HttpUrl("https://shop.com/success")],
-    )
-    failure_url: HttpUrl = Field(
-        ...,
-        description="Redirect URL on failed payment",
-        examples=[HttpUrl("https://shop.com/fail")],
-    )
+    uuid: UUID = Field(..., examples=[UUID("550e8400-e29b-41d4-a716-446655440000")])
+    """Order UUID."""
+
+    amount: int = Field(..., examples=[100000])
+    """Order amount in smallest currency units (cents/kopecks)."""
+
+    currency: TributeCurrency = Field(..., examples=[TributeCurrency.RUB])
+    """Currency code (lowercase)."""
+
+    title: str = Field(..., examples=["Product X"])
+    """Order title (max 100 UTF-16 characters)."""
+
+    description: str = Field(..., examples=["Detailed product description"])
+    """Order description (max 500 UTF-16 characters)."""
+
+    status: TributeOrderStatus = Field(..., examples=[TributeOrderStatus.PAID])
+    """Order status."""
+
+    email: EmailStr | None = Field(None, examples=["customer@example.com"])
+    """Customer email (optional)."""
+
+    success_url: HttpUrl = Field(..., examples=[HttpUrl("https://shop.com/success")])
+    """Redirect URL on successful payment."""
+
+    failure_url: HttpUrl = Field(..., examples=[HttpUrl("https://shop.com/fail")])
+    """Redirect URL on failed payment."""
+
     payment_url: HttpUrl = Field(
         ...,
-        description="URL for customer to complete payment",
         examples=[
             HttpUrl(
                 "https://web.tribute.tg/shop/pay/550e8400-e29b-41d4-a716-446655440000"
             )
         ],
     )
+    """URL for customer to complete payment."""
+
     created_at: datetime = Field(
-        ...,
-        description="Order creation timestamp in ISO 8601 format",
-        examples=[datetime.fromisoformat("2025-11-13T15:04:05Z")],
+        ..., examples=[datetime.fromisoformat("2025-11-13T15:04:05Z")]
     )
-    comment: str | None = Field(
-        None,
-        description="Optional comment for the order",
-        examples=["Special request"],
-    )
-    period: TributeBillingPeriod = Field(
-        ...,
-        description="Billing period for recurring orders",
-        examples=[TributeBillingPeriod.ONETIME],
-    )
+    """Order creation timestamp in ISO 8601 format."""
+
+    comment: str | None = Field(None, examples=["Special request"])
+    """Optional comment for the order."""
+
+    period: TributeBillingPeriod = Field(..., examples=[TributeBillingPeriod.ONETIME])
+    """Billing period for recurring orders."""
+
     member_status: TributeMemberStatus | None = Field(
-        None,
-        description="Recurring subscription status (only for recurring orders)",
-        examples=[TributeMemberStatus.ACTIVE],
+        None, examples=[TributeMemberStatus.ACTIVE]
     )
+    """Recurring subscription status (only for recurring orders)."""
+
     member_expires_at: datetime | None = Field(
         None,
         description=(
@@ -95,6 +74,9 @@ class TributeShopOrder(TributeModel):
         ),
         examples=[datetime.fromisoformat("2025-12-13T15:04:05Z")],
     )
+    """Recurring subscription expiration date in ISO 8601 format
+    (only for recurring orders).
+    """
 
     @field_validator("title")
     @classmethod

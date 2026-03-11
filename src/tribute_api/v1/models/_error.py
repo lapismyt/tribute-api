@@ -1,17 +1,22 @@
 from pydantic import Field
 
 from tribute_api.base.models import TributeModel
-from tribute_api.v1.enums import TributeErrorCode
+from tribute_api.v1.models.enums import TributeErrorCode
 
 
 class TributeError(TributeModel):
-    error: TributeErrorCode = Field(
+    request_id: str = Field(
         ...,
-        description="Error code",
-        examples=[TributeErrorCode.NOT_FOUND],
-    )
+
+        examples=["9c5606ac80274d0f97a0c63689e540f8"])
+    """Request ID"""
+    code: TributeErrorCode = Field(
+        ...,
+
+        examples=[TributeErrorCode.NOT_FOUND])
+    """Error code"""
     message: str = Field(
         ...,
-        description="Error description",
-        examples=["Invalid status"],
-    )
+
+        examples=["shop not found"])
+    """Error description"""

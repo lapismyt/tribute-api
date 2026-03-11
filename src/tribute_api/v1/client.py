@@ -9,7 +9,13 @@ from tribute_api.v1.client_raw import TributeApiV1ClientRaw
 from tribute_api.v1.const import (
     DEFAULT_BASE_URL,
 )
-from tribute_api.v1.enums import TributeOrderStatus
+from tribute_api.v1.models.enums import TributeOrderStatus
+from tribute_api.v1.models.orders._physical_order import TributePhysicalOrder
+from tribute_api.v1.models.products import (
+    TributeCancelDigitalProductPurchaseResponse,
+    TributeProduct,
+    TributeProductType,
+)
 from tribute_api.v1.models.shop import (
     TributeCancelRecurringShopOrderResponse,
     TributeCreateShopOrderRequestBody,
@@ -342,5 +348,172 @@ class TributeApiV1Client(TributeApiV1ClientRaw):
 
         if isinstance(result, tuple):
             return raise_from_error_tuple(result)
+
+        return result
+
+    async def get_products_list(
+        self,
+        limit: int | None = None,
+        product_type: TributeProductType | None = None,
+        desc: bool | None = None,
+    ) -> list[TributeProduct]:
+        """Returns a paginated list of products.
+
+        Args:
+            limit (int | None): Maximum number of products to return.
+                Defaults to None.
+            product_type (TributeProductType | None): Filter products by type.
+                Defaults to None.
+            desc (bool | None): Sort products in descending order.
+                Defaults to None.
+
+        Returns:
+            list[TributeProduct]: Successful response.
+
+        Raises:
+            TributeApiV1BadRequest: Bad request.
+            TributeApiV1Unauthorized: Unauthorized (invalid API key).
+        """
+
+        result_list: list[TributeProduct] = []
+
+        page = 1
+        size = 40
+
+        while True:
+            response = await self.get_products_list_raw(
+                page=page, size=size, product_type=product_type, desc=desc
+            )
+
+            if isinstance(response, tuple):
+                raise_from_error_tuple(response)
+
+            if response.rows:
+                result_list.extend(response.rows)
+                page += 1
+            else:
+                break
+
+            if limit and len(result_list) >= limit:
+                break
+
+        return result_list
+
+    async def get_product_by_id(self, product_id: str) -> TributeProduct:
+        """Returns a single product by its ID.
+
+        Args:
+            product_id (str): Product ID.
+
+        Returns:
+            TributeProduct: Successful response.
+
+        Raises:
+            TributeApiV1BadRequest: Bad request (invalid product ID format).
+            TributeApiV1Unauthorized: Unauthorized (invalid API key).
+            TributeApiV1Forbidden: Access denied.
+            TributeApiV1NotFound: Product not found.
+        """
+
+        result = await self.get_product_by_id_raw(product_id)
+
+        if isinstance(result, tuple):
+            raise_from_error_tuple(result)
+
+        return result
+
+    async def cancel_digital_product_purchase(
+        self, purchase_id: int
+    ) -> TributeCancelDigitalProductPurchaseResponse:
+        """Cancels a digital product purchase and refunds the payment.
+
+        **Important:** This endpoint only supports refunds for purchases
+            paid with Telegram Stars. Purchases paid with other payment methods
+            cannot be refunded via this endpoint.
+
+        Args:
+            purchase_id (int): Purchase ID.
+
+        Returns:
+            TributeCancelDigitalProductPurchaseResponse: Successful response.
+
+        Raises:
+            TributeApiV1BadRequest: Bad request.
+            TributeApiV1Unauthorized: Unauthorized (invalid API key).
+            TributeApiV1Forbidden: Access denied (not the product owner).
+            TributeApiV1NotFound: Purchase or user not found.
+            TributeApiV1ServerError: Internal server error.
+        """
+
+        result = await self.cancel_digital_product_purchase_raw(purchase_id)
+
+        if isinstance(result, tuple):
+            raise_from_error_tuple(result)
+
+        return result
+
+    async def get_orders_list(
+        self,
+        last_order_id: str | None = None,
+        limit: int | None = None,
+        status: list[TributeOrderStatus] | None = None,
+    ) -> list[TributePhysicalOrder]:
+        """Returns a list of physical orders for the current user with pagination.
+
+        Args:
+            last_order_id: The ID of the last order to retrieve (exclusive).
+            limit: The maximum number of orders to retrieve.
+            status: A list of order statuses to filter by.
+
+        Returns:
+            list[TributePhysicalOrder]: Successful response.
+
+        Raises:
+            TributeApiV1BadRequest: Bad request.
+            TributeApiV1Unauthorized: Unauthorized (invalid API key).
+        """
+
+        result_list: list[TributePhysicalOrder] = []
+
+        page = 1
+        size = 40
+
+        while True:
+            response = await self.get_orders_list_raw(
+                page=page, last_order_id=last_order_id, limit=size, status=status
+            )
+
+            if isinstance(response, tuple):
+                raise_from_error_tuple(response)
+
+            if response.rows:
+                result_list.extend(response.rows)
+                page += 1
+            else:
+                break
+
+            if limit and len(result_list) >= limit:
+                break
+
+        return result_list
+
+    async def get_order_details(self, order_id: int) -> TributePhysicalOrder:
+        """Returns detailed information about a specific order.
+
+        Args:
+            order_id: The ID of the order to retrieve.
+
+        Returns:
+            TributePhysicalOrder: Successful response.
+
+        Raises:
+            TributeApiV1BadRequest: Bad request.
+            TributeApiV1Unauthorized: Unauthorized (invalid API key).
+            TributeApiV1NotFound: Order not found.
+        """
+        result = await self.get_order_details_raw(order_id)
+
+        if isinstance(result, tuple):
+            raise_from_error_tuple(result)
 
         return result
