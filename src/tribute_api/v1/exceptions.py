@@ -12,7 +12,11 @@ class TributeApiV1Exception(TributeApiBaseError):
         self.message = message
 
     def __str__(self):
-        return f"{self.error_code}: {self.message}"
+        return (
+            f"{self.error_code}: {self.message}"
+            if self.message
+            else str(self.error_code)
+        )
 
 
 class TributeApiV1BadRequest(TributeApiV1Exception):
